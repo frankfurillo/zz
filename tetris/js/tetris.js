@@ -11,10 +11,33 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
         var
             block = 40,
             cube = [0, 0, block * 2, 0, block * 2, block * 2, 0, block * 2],
-            longy = [0, 0, block, 0, block, block * 4, 0, block * 4],
+            longy = {
+                path:[0, 0, block, 0, block, block * 4, 0, block * 4],
+                blockScheme: [0,0,0,1,0,2,0,3]
+            },
             zShape = [block, 0, block * 2, 0, block * 2, block * 2, block, block * 2, block, block * 3, 0, block * 3, 0, block, block, block],
             button = [0, 0, block * 3, 0, block * 3, block, 0, block],
             tetriColors = ['#F5ccdd', '#e59acc', '#00ddff'];
+
+
+
+
+        var tetriMap = {
+            blocked: [],
+            isTetriCollide: function (zzItem) {
+                for (var i = 0; i < zzItem.blockScheme.length; i += 2) {
+                    for (var a = 0; a < this.blocked.length; a += 2) {
+                        if(this.blocked[a]==(zzItem.getBlockPos().blockX+ zzItem.blockScheme[i])
+                            && this.blocked[a+1]==(zzItem.getBlockPos().blockY+ zzItem.blockScheme[i+1] +1 )){
+                            //found blocked spot
+                            return true;
+                        }
+                            
+                    }
+                }
+                return false;
+            }
+        }
 
 
         Array.prototype.randItem = function () {
@@ -51,6 +74,13 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
 
         }
 
+        zz.stickFigure.prototype.getBlockPos = function () {
+            return {
+                blockX: this.x / block,
+                blockY: this.y / block
+            }
+        }
+
         function seedTetriShape(options) {
             var
                 x = options.x || 0,
@@ -58,6 +88,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
                 shape = options.shape || cube,
                 dirX = options.dirX || 0,
                 dirY = options.dirY || 0,
+                blockScheme = options.blockScheme || null,
                 angle = options.angle || 0;
 
             var tetri = new zz.stickFigure(
@@ -75,10 +106,20 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
                 }
             );
             tetri.onRenderEnd = function (item) {
-                if (item.y > (zz.world.h - item.h)) {
+                //Must also check here if it is a collide with a previous piece. Do not use collision test, but use blockScheme
+                if (((item.y + block )> (zz.world.h - item.h)) || tetriMap.isTetriCollide(item)) {
                     item.attachedForce.y = 0; //drop speed when hitting flor
+                    item.stopped = true;
+                    //update total tetri map, with taken spots.
+                    for (var i = 0; i < item.blockScheme.length; i += 2) {
+                        tetriMap.blocked.push(item.getBlockPos().blockX + item.blockScheme[i], item.getBlockPos().blockY + item.blockScheme[i + 1]);
+                    }
+                    delete item.onRenderEnd; //tetrifig has reached bottom.
+                    currentFallingItem = seedFallingItem();
+
                 }
             };
+            tetri.blockScheme = blockScheme;
             return tetri;
 
         }
@@ -108,7 +149,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
 
         function seedFallingItem() {
             //randomize shapes later...
-            var zzItem =seedTetriShape({ x: 5*block, y: block, shape: longy, dirX: 0, dirY: 0 });
+            var zzItem =seedTetriShape({ x: 5*block, y: block, shape: longy.path, dirX: 0, dirY: 0,blockScheme:longy.blockScheme});
             zz.world.items.push(zzItem);
             return zzItem;
         }
@@ -147,22 +188,31 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
             }
         }
         var tmpDate = new Date().getTime();
+
+
         zz.run(function (ctx) { //render callback som parameter. Anropas från animate. 
             c++;
             var elapsed = new Date().getTime() - tmpDate;
-            if ((elapsed / 1000) > 1) {
-                zzDebug.debug("counter", elapsed);
-                tmpDate = new Date().getTime();
-                currentFallingItem.y += block;
-            }
             zz.world.items.forEach(function (stickFig) {
                 //  if(stickFig)
                 //if(new Date()
                 stickFig.render(stickFig.onRenderEnd);
                 lastTime = Date.now();
             });
+            if ((elapsed / 1000) > 0.3) {
+                zzDebug.debug("counter", elapsed);
+                tmpDate = new Date().getTime();
+                handleFallingItem();
+            }
         });
         
+
+        function handleFallingItem() {
+            if (!currentFallingItem.stopped) {
+                currentFallingItem.y += block;
+            }
+
+        }
 
     });
 });
