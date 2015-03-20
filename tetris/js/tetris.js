@@ -1,16 +1,8 @@
 ﻿requirejs.config({
-    baseUrl: '../../src',
+    baseUrl: '../../',
     paths: {
         lib: 'lib'
     }
-    /*, JUST fixed zz to AMD
-    shim: {
-        'zz_dep': {
-            deps: ['jquery'],
-            exports : 'zz'
-        }
-
-    }*/
 });
 define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], function ($, zz, zzUtil, zzInteraction,zzDebug) {
     $("document").ready(function () {
@@ -114,16 +106,22 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
             seedSimpleShape({ x: 0, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666' })
         ];
 
+        function seedFallingItem() {
+            //randomize shapes later...
+            var zzItem =seedTetriShape({ x: 5*block, y: block, shape: longy, dirX: 0, dirY: 0 });
+            zz.world.items.push(zzItem);
+            return zzItem;
+        }
         zz.world.items.push(
-            seedTetriShape({ x: 200, y: 100, shape: longy, dirX: 0, dirY: 2 }),
-            seedTetriShape({ x: 300, y: 10, shape: cube, dirX: 0, dirY: 1.4 }),
-            seedTetriShape({ x: 400, y: 50, shape: zShape, dirX: 0, dirY: 3 }),
-
+            //seedTetriShape({ x: 200, y: 100, shape: longy, dirX: 0, dirY: 0 }),
+            //seedTetriShape({ x: 300, y: 10, shape: cube, dirX: 0, dirY: 0 }),
+            //seedTetriShape({ x: 400, y: 50, shape: zShape, dirX: 0, dirY: 0 }),
             buttons[0],
             buttons[1]
             );
 
         var c = 0;
+        var currentFallingItem = seedFallingItem();
         buttons.forEach(function (b) {
             zzInteraction.bind(b, "mouseover", function (ev, zzItem) {
                 zzItem.fillColor = "#00FFFF";
@@ -135,25 +133,36 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
         });
 
         zzInteraction.bind(buttons[0], "mousedown", function (ev, zzItem) {
-            alert("right");
+            moveItemSideways(block);
         });
 
         zzInteraction.bind(buttons[1], "mousedown", function (ev, zzItem) {
-            alert("left");
+            moveItemSideways(-block);
         });
 
-        function moveItemLeft(zzItem) {
-
+        function moveItemSideways(x) {
+            //alert(zz.world.w)
+            if ((currentFallingItem.x + x ) >= 0 && ((currentFallingItem.x + x) <= (zz.world.w - block))){ 
+                currentFallingItem.x += x;
+            }
         }
-
+        var tmpDate = new Date().getTime();
         zz.run(function (ctx) { //render callback som parameter. Anropas från animate. 
             c++;
+            var elapsed = new Date().getTime() - tmpDate;
+            if ((elapsed / 1000) > 1) {
+                zzDebug.debug("counter", elapsed);
+                tmpDate = new Date().getTime();
+                currentFallingItem.y += block;
+            }
             zz.world.items.forEach(function (stickFig) {
                 //  if(stickFig)
+                //if(new Date()
                 stickFig.render(stickFig.onRenderEnd);
+                lastTime = Date.now();
             });
         });
-
+        
 
     });
 });

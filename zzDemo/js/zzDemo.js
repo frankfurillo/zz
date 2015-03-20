@@ -1,5 +1,5 @@
 ﻿requirejs.config({
-    baseUrl: '../../src',
+    baseUrl: '../../',
     paths: {
         lib: 'lib'
     }
@@ -50,7 +50,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
         var star = [0, 10, 3, 7, 6, 10, 3, 13],
             square = [0, 0, 10, 0, 10, 10, 0, 10],
-            testCloud = [0, 0, 100, 0, 100, 30, 0, 30]
+            testCloud = [0,20,40,0,80,20,81,21,120,0,160,20,120,40,80,30,79,29,40,40]
         ;
         zz.definitions.shapes.push(noSquare);
         function seedRandomPopcorn() {
