@@ -9,42 +9,28 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
         zz.init($("#canvas1")[0]);
 
         var
-            block = 40,
-            cube = [0, 0, block * 2, 0, block * 2, block * 2, 0, block * 2],
-            longy = {
-                path:[0, 0, block, 0, block, block * 4, 0, block * 4],
-                blockScheme: [0,0,0,1,0,2,0,3]
-            },
-            zShape = [block, 0, block * 2, 0, block * 2, block * 2, block, block * 2, block, block * 3, 0, block * 3, 0, block, block, block],
+            board = [14, 19],
+            boardMap = [[]];
+            block = 30,
+            miniCube = [0, 0, 1, 0, 1, 1, 0, 1],
+            longy = [[0, 0, 0, 1, 0, 2, 0, 3], [0, 0, 1,0, 2, 0, 3, 0]],
             button = [0, 0, block * 3, 0, block * 3, block, 0, block],
             tetriColors = ['#F5ccdd', '#e59acc', '#00ddff'];
 
-
-
-
-        var tetriMap = {
-            blocked: [],
-            isTetriCollide: function (zzItem) {
-                for (var i = 0; i < zzItem.blockScheme.length; i += 2) {
-                    for (var a = 0; a < this.blocked.length; a += 2) {
-                        if(this.blocked[a]==(zzItem.getBlockPos().blockX+ zzItem.blockScheme[i])
-                            && this.blocked[a+1]==(zzItem.getBlockPos().blockY+ zzItem.blockScheme[i+1] +1 )){
-                            //found blocked spot
-                            return true;
-                        }
-                            
-                    }
-                }
-                return false;
-            }
+        function blockify(shape) {
+            return  shape.map(function (a) {
+                return a * 40;
+            });
         }
-
 
         Array.prototype.randItem = function () {
             return this[Math.floor(Math.random() * this.length)];
         }
 
-        zz.definitions.shapes.push(cube);
+
+      
+
+
 
         function seedSimpleShape(options) {
             var
@@ -74,69 +60,38 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
 
         }
 
-        zz.stickFigure.prototype.getBlockPos = function () {
-            return {
-                blockX: this.x / block,
-                blockY: this.y / block
+     
+
+        function drawBoard() {
+            var bWidth= board[0];
+            var bHeight = board[1];
+            for (var i = 0; i < bWidth ; i++) {
+                boardMap.push([]);
+                for (var a = 0; a < bHeight; a++) {
+                    var boardBlock = new zz.stickFigure(
+                        i * block,
+                        a * block,
+                        block,
+                        block,
+                        '#bbbbbb',
+                        '#555555',
+                        blockify(miniCube),
+                        0,
+                        {
+                            x: 0,
+                            y: 0
+                        }
+                    );
+                    boardMap[i].push([]);
+                    boardMap[i][a]=boardBlock;
+                    zz.world.items.push(boardBlock)
+                }
             }
         }
 
-        function seedTetriShape(options) {
-            var
-                x = options.x || 0,
-                y = options.y || 0,
-                shape = options.shape || cube,
-                dirX = options.dirX || 0,
-                dirY = options.dirY || 0,
-                blockScheme = options.blockScheme || null,
-                angle = options.angle || 0;
+        drawBoard();
 
-            var tetri = new zz.stickFigure(
-                x,
-                y,
-                zzUtil.shapeSize(shape).w,
-                zzUtil.shapeSize(shape).h,
-                tetriColors.randItem(),
-                tetriColors.randItem(),
-                shape,
-                0,
-                {
-                    x: dirX,
-                    y: dirY
-                }
-            );
-            tetri.onRenderEnd = function (item) {
-                //Must also check here if it is a collide with a previous piece. Do not use collision test, but use blockScheme
-                if (((item.y + block )> (zz.world.h - item.h)) || tetriMap.isTetriCollide(item)) {
-                    item.attachedForce.y = 0; //drop speed when hitting flor
-                    item.stopped = true;
-                    //update total tetri map, with taken spots.
-                    for (var i = 0; i < item.blockScheme.length; i += 2) {
-                        tetriMap.blocked.push(item.getBlockPos().blockX + item.blockScheme[i], item.getBlockPos().blockY + item.blockScheme[i + 1]);
-                    }
-                    delete item.onRenderEnd; //tetrifig has reached bottom.
-                    currentFallingItem = seedFallingItem();
 
-                }
-            };
-            tetri.blockScheme = blockScheme;
-            return tetri;
-
-        }
-
-        function startOverX(item) {
-            if (item.attachedForce.x < 0) {
-                if (item.x < -item.w) {
-                    item.x = zz.world.w;
-                }
-            }
-            else {
-                if (item.x > zz.world.w) {
-                    item.x = 0;
-                }
-
-            }
-        }
         //zz.world.items.push(seedCube());
         var buttons = [
             seedSimpleShape({
@@ -144,25 +99,61 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
                 y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666'
             }),
 
-            seedSimpleShape({ x: 0, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666' })
-        ];
+            seedSimpleShape({ x: 0, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666' }),
+            seedSimpleShape({ x: zz.world.w/2, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeee11', borderColor: '#666666' })
+            ];
 
-        function seedFallingItem() {
-            //randomize shapes later...
-            var zzItem =seedTetriShape({ x: 5*block, y: block, shape: longy.path, dirX: 0, dirY: 0,blockScheme:longy.blockScheme});
-            zz.world.items.push(zzItem);
-            return zzItem;
+        var gameControl = {
+                defaultBlockColor : '#aaaaaa',
+                currentFallingItem:{
+                    variShape: null,
+                    rotation: 0, //index,
+                    offsetX:0,
+                    offsetY: 0,
+                    rotate: function () {
+                        if (this.rotation < this.variShape.length - 1) {
+                            this.rotation++;
+                        }
+                        else {
+                            this.rotation = 0;
+                        }
+                    }
+                }
+            ,
+                seedFallingItem: function () {
+                    //clearPrevious first
+                    this.clearAllNonBlocked();
+                    var currShape = this.currentFallingItem.variShape[this.currentFallingItem.rotation]; //cant do this here if we shall repeat this function....
+                    var x = this.currentFallingItem.offsetX;
+                    var y = this.currentFallingItem.offsetY;
+
+                    for (var i = 0; i < currShape.length; i += 2) {
+                        boardMap[currShape[i] + x][currShape[i + 1] + y].fillColor = "#ff2299";
+                    }
+
+                }
+            ,
+                clearAllNonBlocked: function () {
+                    for(var i=0;i < boardMap.length ;i++){
+                        for (var a = 0 ; a< boardMap[i].length ; a++){
+                            boardMap[i][a].fillColor = this.defaultBlockColor;
+                        }
+                    }
+                }
+            ,
+                moveItemSideways: function (xDir) {
+                    this.currentFallingItem.offsetX += xDir;
+                }
+
         }
-        zz.world.items.push(
-            //seedTetriShape({ x: 200, y: 100, shape: longy, dirX: 0, dirY: 0 }),
-            //seedTetriShape({ x: 300, y: 10, shape: cube, dirX: 0, dirY: 0 }),
-            //seedTetriShape({ x: 400, y: 50, shape: zShape, dirX: 0, dirY: 0 }),
-            buttons[0],
-            buttons[1]
-            );
 
-        var c = 0;
-        var currentFallingItem = seedFallingItem();
+        buttons.forEach(function (b) {
+            zz.world.items.push(b);
+        })
+
+
+        
+
         buttons.forEach(function (b) {
             zzInteraction.bind(b, "mouseover", function (ev, zzItem) {
                 zzItem.fillColor = "#00FFFF";
@@ -174,24 +165,26 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
         });
 
         zzInteraction.bind(buttons[0], "mousedown", function (ev, zzItem) {
-            moveItemSideways(block);
+            gameControl.moveItemSideways(1);
         });
 
         zzInteraction.bind(buttons[1], "mousedown", function (ev, zzItem) {
-            moveItemSideways(-block);
+            gameControl.moveItemSideways(-1);
         });
 
-        function moveItemSideways(x) {
-            //alert(zz.world.w)
-            if ((currentFallingItem.x + x ) >= 0 && ((currentFallingItem.x + x) <= (zz.world.w - block))){ 
-                currentFallingItem.x += x;
-            }
-        }
+        zzInteraction.bind(buttons[2], "mousedown", function (ev, zzItem) {
+            //rotate btn
+
+            gameControl.currentFallingItem.rotate();
+        });
+
         var tmpDate = new Date().getTime();
 
+        gameControl.currentFallingItem.variShape = longy;
+        gameControl.currentFallingItem.offsetX = 5;
+        gameControl.seedFallingItem();
 
         zz.run(function (ctx) { //render callback som parameter. Anropas från animate. 
-            c++;
             var elapsed = new Date().getTime() - tmpDate;
             zz.world.items.forEach(function (stickFig) {
                 //  if(stickFig)
@@ -199,8 +192,8 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
                 stickFig.render(stickFig.onRenderEnd);
                 lastTime = Date.now();
             });
+            gameControl.seedFallingItem();
             if ((elapsed / 1000) > 0.3) {
-                zzDebug.debug("counter", elapsed);
                 tmpDate = new Date().getTime();
                 handleFallingItem();
             }
@@ -208,10 +201,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug'], fu
         
 
         function handleFallingItem() {
-            if (!currentFallingItem.stopped) {
-                currentFallingItem.y += block;
-            }
-
+            gameControl.currentFallingItem.offsetY++;
         }
 
     });
