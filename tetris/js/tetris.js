@@ -12,11 +12,20 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
     }
 
     $("document").ready(function () {
-        zz.init($("#canvas1")[0]);
+        zz.init($("#canvas1")[0], function (c) {
+            if (window.innerWidth < 960) {
+                var origWidth = c.width;
+                var origHeight = c.height;
+                var deltaW = window.innerWidth / origWidth;
+                c.width = window.innerWidth;
+                c.height = origHeight * deltaW;
+            }
+        });
         var
-            board = [12, 18],
+            board = [12, 17],
             boardMap = [[]];
         block = calcSize(),
+        lock =false,
         miniCube = [0, 0, 1, 0, 1, 1, 0, 1],
         longy = [[0, 0, 0, 1, 0, 2, 0, 3], [0, 0, 1,0, 2, 0, 3, 0]],
         zed = [[0, 1, 1, 1, 1, 2, 2, 2], [2, 0, 1, 1, 2, 1, 1, 2]],
@@ -262,7 +271,9 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                     }
                 }
                 if (this.currentFallingItem.offsetY < 1) {
-                    alert("game over") //?
+                    //alert("game over") //?
+                    this.state = -2;
+                    renderStartScreen();
 
                 }
                   
@@ -270,7 +281,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 
             },
             initFallingItem: function () {
-                this.state = 1;
+              //  this.state = 1;
                 this.currentFallingItem.variShape = [longy, zed, zedReverse, cube, theL, theLReverse].randItem();
                 this.currentFallingItem.offsetX = 5;
                 this.currentFallingItem.offsetY = 0;
@@ -321,8 +332,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
         //draw some cool alphanums....
         
-
-        function renderStartScreen() {
+        function renderStaticItems() {
             var yposLetter = 59;
             letterbox.renderLetter(letterbox.alphabet.t, 10, 2, yposLetter);
             letterbox.renderLetter(letterbox.alphabet.e, 10, 9, yposLetter);
@@ -330,6 +340,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
             letterbox.renderLetter(letterbox.alphabet.r, 10, 21, yposLetter);
             letterbox.renderLetter(letterbox.alphabet.i, 10, 25, yposLetter);
             letterbox.renderLetter(letterbox.alphabet.s, 10, 30, yposLetter);
+
+        }
+
+        function renderStartScreen() {
+            
             gameControl.startScreenItems = [];
             var startButton = new zz.stickFigure(150, 120, 100, 100, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, 90), 0, { x: 0, y: 0 })
             zz.world.items.push(
@@ -343,11 +358,13 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
             gameControl.startScreenItems.push(tControl);
             zzInteraction.bind(startButton, "mousedown", function (ev, zzItem) {
                 hideStartScreen();
+                gameControl.state = 1;
                 gameControl.initFallingItem();
             });
 
 
         }
+        renderStaticItems();
         renderStartScreen();
 
         function hideStartScreen() {
@@ -376,19 +393,39 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         
 
         function handleFallingItem() {
-            //check collision before moving
-            if (!gameControl.isColliding()) {
-                gameControl.currentFallingItem.offsetY++;
-            }
-            else {
-                gameControl.blockCurrentItemInBoard();
-                gameControl.checkScore();
+            if (!lock) {
+                lock = true;
+                //check collision before moving
+                if (!gameControl.isColliding()) {
+                    gameControl.currentFallingItem.offsetY++;
+                }
+                else {
+                    gameControl.blockCurrentItemInBoard();
+                    gameControl.checkScore();
 
-                gameControl.initFallingItem();
+                    gameControl.initFallingItem();
+                }
+                lock = false;
             }
         }
 
-        $(document).bind("keydown",function(event){
+        kds = "";
+        var k40down = false;
+        function killKeyDownAction() {
+            if (kds != "") {
+                clearInterval(kds);
+                kds="";
+            }
+        }
+        $(document).bind("keyup", function (event) {
+            killKeyDownAction();
+        });
+
+        $(document).bind("keydown", function (event) {
+            if (gameControl.state < 0) {
+                return;
+            }
+            killKeyDownAction();
             if (event.keyCode === 37) {
                 gameControl.moveItemSideways(-1)
             }
@@ -396,7 +433,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 gameControl.moveItemSideways(1)
             }
             if (event.keyCode === 40) {
-                handleFallingItem();
+                if (kds == "") {
+                    kds = setInterval(function () {
+                        handleFallingItem();
+                    }, 50);
+                }
             }
             if (event.keyCode === 38) {
                 gameControl.currentFallingItem.rotate();
