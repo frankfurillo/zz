@@ -8,21 +8,33 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
     function calcSize() {
         //$('#canvas1').css('width', $(document).width() - 50);
         //$('#canvas1').css('height', $(document).height() - 50);
-        return zz.world.w / 12;
+        return (zz.world.w - (zz.world.w/7)) / 11; //remove a 10th for status messages
     }
 
     $("document").ready(function () {
         zz.init($("#canvas1")[0], function (c) {
-            if (window.innerWidth < 960) {
-                var origWidth = c.width;
-                var origHeight = c.height;
-                var deltaW = window.innerWidth / origWidth;
-                c.width = window.innerWidth;
-                c.height = origHeight * deltaW;
+            var origWidth = c.width;
+            var origHeight = c.height;
+            var widthToHeight = origWidth / origHeight;
+            var newWidth = window.innerWidth;
+            var newHeight = window.innerHeight;
+            var newWidthToHeight = newWidth / newHeight;
+            if (newWidthToHeight > widthToHeight) {
+                // window width is too wide relative to desired game width
+                newWidth = newHeight * widthToHeight;
+                document.getElementById('gameArea').style.height = newHeight + 'px';
+                document.getElementById('gameArea').style.width = newWidth + 'px';
+            } else { // window height is too high relative to desired game height
+                newHeight = newWidth / widthToHeight;
+                document.getElementById('gameArea').style.width = newWidth + 'px';
+                document.getElementById('gameArea').style.height = newHeight + 'px';
             }
+            c.width = newWidth;
+            c.height = newHeight;
+
         });
         var
-            board = [12, 17],
+            board = [11, 21],
             boardMap = [[]];
         block = calcSize(),
         lock =false,
@@ -346,12 +358,12 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         function renderStartScreen() {
             
             gameControl.startScreenItems = [];
-            var startButton = new zz.stickFigure(150, 120, 100, 100, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, 90), 0, { x: 0, y: 0 })
+            var startButton = new zz.stickFigure((zz.world.w / 2) - 50, 120, 100, 100, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, 90), 0, { x: 0, y: 0 })
             zz.world.items.push(
                 startButton
                 );
             gameControl.startScreenItems.push(startButton);
-            var tControl = new zz.textBlock(175, 160, 200, 30, "START", 44);
+            var tControl = new zz.textBlock((zz.world.w/2) - 30, 160, 200, 30, "START", 44);
 
 
             zz.world.items.push(tControl);
