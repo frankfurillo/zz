@@ -4,20 +4,23 @@
         lib: 'lib'
     }
 });
-define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib/letterbox'], function ($, zz, zzUtil, zzInteraction,zzDebug,letterbox) {
+define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib/letterbox','lib/zzSound','lib/kindof'], function ($, zz, zzUtil, zzInteraction,zzDebug,letterbox,zzSound,kindof) {
     function calcSize() {
         //$('#canvas1').css('width', $(document).width() - 50);
         //$('#canvas1').css('height', $(document).height() - 50);
-        return (zz.world.w - (zz.world.w/7)) / 11; //remove a 10th for status messages
+        return zz.world.w / 11;
     }
 
     $("document").ready(function () {
         zz.init($("#canvas1")[0], function (c) {
+            //zzSound.init({ tempo: 120 }, function (synth) {
+            //    synth.playNotes(['A', 'B']);
+            //});
             var origWidth = c.width;
             var origHeight = c.height;
             var widthToHeight = origWidth / origHeight;
             var newWidth = window.innerWidth;
-            var newHeight = window.innerHeight;
+            var newHeight = window.innerHeight-20;
             var newWidthToHeight = newWidth / newHeight;
             if (newWidthToHeight > widthToHeight) {
                 // window width is too wide relative to desired game width
@@ -34,19 +37,19 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
         });
         var
-            board = [11, 21],
+            board = [11, 18],
             boardMap = [[]];
         block = calcSize(),
-        lock =false,
+        lock = false,
+        defaultBlockColor = '#505050',
         miniCube = [0, 0, 1, 0, 1, 1, 0, 1],
-        longy = [[0, 0, 0, 1, 0, 2, 0, 3], [0, 0, 1,0, 2, 0, 3, 0]],
+        longy = [[0, 0, 0, 1, 0, 2, 0, 3], [0, 0, 1, 0, 2, 0, 3, 0]],
         zed = [[0, 1, 1, 1, 1, 2, 2, 2], [2, 0, 1, 1, 2, 1, 1, 2]],
         zedReverse = [[0, 0, 0, 1, 1, 1, 1, 2], [1, 1, 2, 1, 0, 2, 1, 2]],
         cube = [[0, 0, 1, 0, 0, 1, 1, 1]],
         theL = [[0, 1, 0, 2, 1, 2, 2, 2], [1, 0, 2, 0, 1, 1, 1, 2], [0, 1, 1, 1, 2, 1, 2, 2], [1, 0, 1, 1, 1, 2, 0, 2]],
         theLReverse = [[1, 0, 1, 1, 1, 2, 2, 2], [0, 1, 1, 1, 2, 1, 0, 2], [0, 0, 1, 0, 1, 1, 1, 2], [0, 2, 1, 2, 2, 2, 2, 1]],
-        button = [0, 0, block * 3, 0, block * 3, block, 0, block],
-        tetriColors = ['#F5ccdd', '#e59acc', '#00ddff'];
+        button = [0, 0, block * 3, 0, block * 3, block, 0, block];
 
 
         Array.prototype.randItem = function () {
@@ -99,8 +102,8 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                         a * block,
                         block,
                         block,
-                        '#bbbbbb',
-                        '#555555',
+                        defaultBlockColor,
+                        defaultBlockColor,
                         zzUtil.blockify(miniCube),
                         0,
                         {
@@ -133,7 +136,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
         var gameControl = {
             state:-1, //all above zero is running, -1 notstarted, -2 gameovcer
-            defaultBlockColor: '#aaaaaa',
+            defaultBlockColor: defaultBlockColor,
             currentFallingItem:{
                 variShape: null,
                 rotation: 0, //index,
@@ -298,7 +301,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 this.currentFallingItem.offsetX = 5;
                 this.currentFallingItem.offsetY = 0;
                 this.currentFallingItem.rotation = 0;
-                this.currentFallingItem.color = ['#55ffcc', '#fe44d6', '#fefe55', '#cc56ab', '#ba26eb'].randItem();
+                this.currentFallingItem.color = ['#7d9dac', '#de7011', '#ff4f45', '#fbef29', '#a67c52', '#669e91'].randItem();
                 this.seedFallingItem();
 
             }
@@ -309,7 +312,6 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         buttons.forEach(function (b) {
             zz.world.items.push(b);
         })
-
 
         
 
@@ -345,25 +347,37 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         //draw some cool alphanums....
         
         function renderStaticItems() {
-            var yposLetter = 59;
-            letterbox.renderLetter(letterbox.alphabet.t, 10, 2, yposLetter);
-            letterbox.renderLetter(letterbox.alphabet.e, 10, 9, yposLetter);
-            letterbox.renderLetter(letterbox.alphabet.t, 10, 14, yposLetter);
-            letterbox.renderLetter(letterbox.alphabet.r, 10, 21, yposLetter);
-            letterbox.renderLetter(letterbox.alphabet.i, 10, 25, yposLetter);
-            letterbox.renderLetter(letterbox.alphabet.s, 10, 30, yposLetter);
+          //  var yposLetter = 10;
+          //  letterbox.renderSentence('gunnar', 8,0, yposLetter, '#ffddcc');
+          //  //letterbox.renderLetter(letterbox.alphabet.t, 10, 2, yposLetter);
+          //  //letterbox.renderLetter(letterbox.alphabet.e, 10, 9, yposLetter);
+          //  letterbox.renderLetter(letterbox.alphabet.t, 10, 14, yposLetter);
+          //  //letterbox.renderLetter(letterbox.alphabet.r, 10, 21, yposLetter);
+          //  //letterbox.renderLetter(letterbox.alphabet.i, 10, 25, yposLetter);
+          //  //letterbox.renderLetter(letterbox.alphabet.s, 10, 30, yposLetter);
+          //zz.world.items.push(
+          //          new zz.image(
+          //          {
+          //              src: "/img/arrow.png",
+          //              x: block * 2 ,
+          //              y: 150,
+          //              w: block,
+          //              h: block
+          //          }
+          //  ));
+
 
         }
 
         function renderStartScreen() {
             
             gameControl.startScreenItems = [];
-            var startButton = new zz.stickFigure((zz.world.w / 2) - 50, 120, 100, 100, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, 90), 0, { x: 0, y: 0 })
+            var startButton = new zz.stickFigure((zz.world.w / 2) - block*2, block*8, block*5, block*2, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, block*3), 0, { x: 0, y: 0 })
             zz.world.items.push(
                 startButton
                 );
             gameControl.startScreenItems.push(startButton);
-            var tControl = new zz.textBlock((zz.world.w/2) - 30, 160, 200, 30, "START", 44);
+            var tControl = new zz.textBlock((zz.world.w / 2) - block*3.5, block*4, 200, 30, "TETRIS", '#ff4f45', {size:block*2,font:'garamond',fontStyle:'bold'});
 
 
             zz.world.items.push(tControl);
@@ -386,7 +400,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         }
 
 
-        zz.world.items.push(new zz.textBlock(10, 24, 200, 30, "Tetris by frankfurillo", 44));
+       // zz.world.items.push(new zz.textBlock(10, 24, 200, 30, "Tetris by frankfurillo", 44));
 
         zz.run(function (ctx) { //render callback som parameter. Anropas från animate. 
             var elapsed = new Date().getTime() - tmpDate;
