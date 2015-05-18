@@ -1,7 +1,16 @@
-﻿div.centerme {
+﻿@font-face {
+    font-family: odin;
+    src: url(fonts/odin_rounded_-_bold-webfont.woff);
+}
+@font-face {
+    font-family: norwester;
+    src: url(fonts/norwester.woff);
+}
+div.centerme {
     width:300px;
     
     margin:10px auto 10px auto;
      
 }
 body{margin:0px}
+

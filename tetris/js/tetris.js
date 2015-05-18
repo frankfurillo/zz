@@ -50,6 +50,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         theL = [[0, 1, 0, 2, 1, 2, 2, 2], [1, 0, 2, 0, 1, 1, 1, 2], [0, 1, 1, 1, 2, 1, 2, 2], [1, 0, 1, 1, 1, 2, 0, 2]],
         theLReverse = [[1, 0, 1, 1, 1, 2, 2, 2], [0, 1, 1, 1, 2, 1, 0, 2], [0, 0, 1, 0, 1, 1, 1, 2], [0, 2, 1, 2, 2, 2, 2, 1]],
         button = [0, 0, block * 3, 0, block * 3, block, 0, block];
+        footerBg = [0, 0, block * 12, 0, block * 12, block*2, 0, block*2];
 
 
         Array.prototype.randItem = function () {
@@ -122,15 +123,16 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         drawBoard();
 
 
-        var buttons = [
-            seedSimpleShape({
-                x: zz.world.w - zzUtil.shapeSize(button).w,
-                y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666'
-            }),
+        
+        //var buttons = [
+        //    seedSimpleShape({
+        //        x: zz.world.w - zzUtil.shapeSize(button).w,
+        //        y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666'
+        //    }),
 
-            seedSimpleShape({ x: 0, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666' }),
-            seedSimpleShape({ x: (zz.world.w/2) - 40 , y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeee11', borderColor: '#666666' })
-        ];
+        //    seedSimpleShape({ x: 0, y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeeeee', borderColor: '#666666' }),
+        //    seedSimpleShape({ x: (zz.world.w/2) - 40 , y: zz.world.h - zzUtil.shapeSize(button).h, shape: button, color: '#eeee11', borderColor: '#666666' })
+        //];
 
        
 
@@ -144,6 +146,10 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 offsetY: 0,
                 color: '#ff2299',
                 rotate: function () {
+                    if (gameControl.isCollidingSideways(1) || gameControl.isCollidingSideways(-1)) { //TODO TEST THIS SHWAJT
+                        return;
+                    }
+
                     if (this.rotation < (this.variShape.length - 1)) {
                         this.rotation++;
                     }
@@ -261,10 +267,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                             allblockedonrow = false;
                         }
                     }
-                    if (allblockedonrow) { //NON WORKING
+                    if (allblockedonrow) { 
                         for (var a = boardMap.length - 1; a >= 0; a--) {
                             boardMap[a][i].fillColor = this.defaultBlockColor;
                             boardMap[a][i].blocked = false;
+
                             for (var s = i-1; s >= 0; s--) {
                                 if (s > 0 && boardMap[a][s].blocked) { //TODO mUSt chek ALL lines above, EVERYTHING SHALL MOVE DOWN
                                     //CHECK ABOVE COLS HERE AND MOVE DOWN (chg fillcolor)
@@ -280,6 +287,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                             }
 
                         }
+                        this.score.add();
 
                         //psuedo: go through the row with the hit. For each col check if there is an item attached to the correspondig col above - then move
                         //that item to where we are. Otherwise just delete it.
@@ -288,8 +296,15 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 if (this.currentFallingItem.offsetY < 1) {
                     //alert("game over") //?
                     this.state = -2;
-                    renderStartScreen();
-
+                    //renderStartScreen();
+                    boardMap.forEach(function (a) {
+                        a.forEach(function (b) {
+                            b.mass = 0.008;
+                        });
+                    });
+                    setTimeout(function () {
+                        renderGameOver();
+                    }, 1500);
                 }
                   
 
@@ -304,42 +319,75 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 this.currentFallingItem.color = ['#7d9dac', '#de7011', '#ff4f45', '#fbef29', '#a67c52', '#669e91'].randItem();
                 this.seedFallingItem();
 
+            },
+            score: {
+                value:0,
+                add:function(){
+                    this.value++;
+                    this.zzItem.text = this.constructText();
+                },
+                constructText: function () {
+                    var digits = "";
+                    if (this.value < 10) {
+                        digits = "00" + this.value;
+                    }
+                    else if (this.value < 100) {
+                        digits = "0" + this.value;
+                    }
+                    else {
+                        digits = this.value;
+                    }
+
+                    this.scoreText = "LINES: " + digits;
+                        //(this.value < 10 ? "00" + this.value : this.value < 100 ? "0" + this.value : this.value);
+                    return this.scoreText;
+                },
+                init: function () {
+                    this.value = 0;
+                    this.constructText();
+                    this.zzItem = new zz.textBlock(block*0.4, (block * 19)+4, 200, 30, this.scoreText, '#a67c52', { size: block * 0.7, font: 'arial', fontStyle: 'bold' });
+                    zz.world.items.push(
+                        this.zzItem
+                        );
+                    
+                }
             }
+
 
 
         }
 
-        buttons.forEach(function (b) {
-            zz.world.items.push(b);
-        })
+        //buttons.forEach(function (b) {
+        //    zz.world.items.push(b);
+        //})
 
         
 
-        buttons.forEach(function (b) {
-            zzInteraction.bind(b, "mouseover", function (ev, zzItem) {
-                zzItem.fillColor = "#0000FF";
-            });
-            zzInteraction.bind(b, "mouseout", function (ev, zzItem) {
-                zzItem.fillColor = "#EEEEEE";
-            });
-        });
+        //buttons.forEach(function (b) {
+        //    zzInteraction.bind(b, "mouseover", function (ev, zzItem) {
+        //        zzItem.fillColor = "#0000FF";
+        //    });
+        //    zzInteraction.bind(b, "mouseout", function (ev, zzItem) {
+        //        zzItem.fillColor = "#EEEEEE";
+        //    });
+        //});
 
-        zzInteraction.bind(buttons[0], "mousedown", function (ev, zzItem) {
-            //right
-            gameControl.moveItemSideways(1);
-        });
+        //zzInteraction.bind(buttons[0], "mousedown", function (ev, zzItem) {
+        //    //right
+        //    gameControl.moveItemSideways(1);
+        //});
         
 
 
-        zzInteraction.bind(buttons[1], "mousedown", function (ev, zzItem) {
-            //left
-            gameControl.moveItemSideways(-1);
-        });
+        //zzInteraction.bind(buttons[1], "mousedown", function (ev, zzItem) {
+        //    //left
+        //    gameControl.moveItemSideways(-1);
+        //});
 
-        zzInteraction.bind(buttons[2], "mousedown", function (ev, zzItem) {
-            //rotate btn
-          gameControl.currentFallingItem.rotate();
-        });
+        //zzInteraction.bind(buttons[2], "mousedown", function (ev, zzItem) {
+        //    //rotate btn
+        //  gameControl.currentFallingItem.rotate();
+        //});
 
         var tmpDate = new Date().getTime();
 
@@ -347,41 +395,76 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         //draw some cool alphanums....
         
         function renderStaticItems() {
-          //  var yposLetter = 10;
-          //  letterbox.renderSentence('gunnar', 8,0, yposLetter, '#ffddcc');
-          //  //letterbox.renderLetter(letterbox.alphabet.t, 10, 2, yposLetter);
-          //  //letterbox.renderLetter(letterbox.alphabet.e, 10, 9, yposLetter);
-          //  letterbox.renderLetter(letterbox.alphabet.t, 10, 14, yposLetter);
-          //  //letterbox.renderLetter(letterbox.alphabet.r, 10, 21, yposLetter);
-          //  //letterbox.renderLetter(letterbox.alphabet.i, 10, 25, yposLetter);
-          //  //letterbox.renderLetter(letterbox.alphabet.s, 10, 30, yposLetter);
-          //zz.world.items.push(
-          //          new zz.image(
-          //          {
-          //              src: "/img/arrow.png",
-          //              x: block * 2 ,
-          //              y: 150,
-          //              w: block,
-          //              h: block
-          //          }
-          //  ));
 
+            var footer = seedSimpleShape({
+                x: 0,
+                y: block * 18.2, shape: footerBg, color: '#222222', borderColor: '#222222'
+            });
+            zz.world.items.push(footer);
 
         }
+
+
+
 
         function renderStartScreen() {
             
             gameControl.startScreenItems = [];
-            var startButton = new zz.stickFigure((zz.world.w / 2) - block*2, block*8, block*5, block*2, "#FEFEFE", "#FFFFFF", zzUtil.blockify(miniCube, block*3), 0, { x: 0, y: 0 })
+            var startButton = new zz.stickFigure(0, 0, block * 11, block * 18, '#333333', defaultBlockColor, zzUtil.blockify(miniCube, block * 18), 0, { x: 0, y: 0 })
             zz.world.items.push(
                 startButton
                 );
+            //var tControl = new zz.textBlock((zz.world.w / 2) - block*3.5, block*4, 200, 30, "TETRIS", '#ff4f45', {size:block*2.5,font:'arial',fontStyle:'bold'});
+            //var startText = new zz.textBlock((zz.world.w / 2) - block * 2.1, block * 8, 200, 30, "Start >", '#ff4f45', { size: block * 1.5, font: 'arial', fontStyle: 'bold' });
+
             gameControl.startScreenItems.push(startButton);
-            var tControl = new zz.textBlock((zz.world.w / 2) - block*3.5, block*4, 200, 30, "TETRIS", '#ff4f45', {size:block*2,font:'garamond',fontStyle:'bold'});
+
+            var yposLetter = 5;
+            letterbox.renderSentence('tetris', 15.5, 1, yposLetter, '#ff4f45').forEach(function (a) {
+                a.forEach(function (b) {
+                    //now in StickFigs
+                    gameControl.startScreenItems.push(b);
+                });
+            });
 
 
-            zz.world.items.push(tControl);
-            gameControl.startScreenItems.push(tControl);
+            gameControl.startScreenItems.push(
+                      new zz.image(
+                      {
+                          src: "/img/tetrisArrowsLeftRight.png",
+                          x: block * 3,
+                          y: block * 5,
+                          w: block*4.41,
+                          h: block*3
+                      }
+              ));
+            gameControl.startScreenItems.push(
+                      new zz.image(
+                      {
+                          src: "/img/tetrisRotate.png",
+                          x: block * 3,
+                          y: block * 9,
+                          w: block * 4.41,
+                          h: block * 2.5
+                      }
+              ));
+            gameControl.startScreenItems.push(
+                      new zz.image(
+                      {
+                          src: "/img/tetrisplay.png",
+                          x: block * 2,
+                          y: block * 13,
+                          w: block * 6.55,
+                          h: block * 3
+                      }
+              ));
+
+            gameControl.startScreenItems.forEach(function (a) {
+                zz.world.items.push(a);
+            });
+
+
+
             zzInteraction.bind(startButton, "mousedown", function (ev, zzItem) {
                 hideStartScreen();
                 gameControl.state = 1;
@@ -390,11 +473,74 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
 
         }
+
+
+
+
+        function renderGameOver() {
+
+            gameControl.gameOverItems = [];
+            var startButton = new zz.stickFigure(0, 0, block * 11, block * 18, '#333333', defaultBlockColor, zzUtil.blockify(miniCube, block * 18), 0, { x: 0, y: 0 })
+            zz.world.items.push(
+                startButton
+                );
+            //var tControl = new zz.textBlock((zz.world.w / 2) - block*3.5, block*4, 200, 30, "TETRIS", '#ff4f45', {size:block*2.5,font:'arial',fontStyle:'bold'});
+            //var startText = new zz.textBlock((zz.world.w / 2) - block * 2.1, block * 8, 200, 30, "Start >", '#ff4f45', { size: block * 1.5, font: 'arial', fontStyle: 'bold' });
+
+            gameControl.gameOverItems.push(startButton);
+
+            var yposLetter = 5;
+            letterbox.renderSentence('game', 15.5, 3, yposLetter, '#ff4f45').forEach(function (a) {
+                a.forEach(function (b) {
+                    //now in StickFigs
+                    gameControl.gameOverItems.push(b);
+                });
+            });
+            letterbox.renderSentence('over', 15.5, 3, 11, '#ff4f45').forEach(function (a) {
+                a.forEach(function (b) {
+                    //now in StickFigs
+                    gameControl.gameOverItems.push(b);
+                });
+            });
+            gameControl.gameOverItems.push(
+              new zz.image(
+                      {
+                          src: "/img/tetrisplay.png",
+                          x: block * 2,
+                          y: block * 13,
+                          w: block * 6.55,
+                          h: block * 3
+                      }
+              ));
+
+            gameControl.gameOverItems.forEach(function (a) {
+                zz.world.items.push(a);
+            });
+
+
+
+            zzInteraction.bind(startButton, "mousedown", function (ev, zzItem) {
+                hideGameOver();
+                drawBoard();
+                gameControl.state = 1;
+                gameControl.score.value=0;
+                gameControl.initFallingItem();
+            });
+
+
+        }
+
         renderStaticItems();
         renderStartScreen();
+        gameControl.score.init();
 
         function hideStartScreen() {
             gameControl.startScreenItems.forEach(function (a) {
+                a.x = 1000;
+            })
+        }
+        function hideGameOver() {
+            gameControl.gameOverItems.forEach(function (a) {
                 a.x = 1000;
             })
         }
@@ -469,6 +615,83 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 gameControl.currentFallingItem.rotate();
             }
         });
+
+        //TODO move this crap out to a module... 
+        var mobileInput = {
+            accelerometer: [0, 0, 0], //x,y,z
+            deltaX: 0,
+            deltaY: 0,
+            touchStartX: 0,
+            touchStartY: 0,
+            touchEndX: 0,
+            touchEndY: 0,
+            isTap:false,
+            isTouching: false,
+             swipeAngle:0,
+             swipeDirection: "left",
+             calculateAngle : function() {
+                var X = this.touchStartX-this.touchEndX;
+                var Y = this.touchEndY-this.touchStartY;
+                var Z = Math.round(Math.sqrt(Math.pow(X,2)+Math.pow(Y,2))); //the distance - rounded - in pixels
+                var r = Math.atan2(Y,X); //angle in radians (Cartesian system)
+                this.swipeAngle = Math.round(r*180/Math.PI); //angle in degrees
+                if ( this.swipeAngle < 0 ) { this.swipeAngle =  360 - Math.abs(this.swipeAngle); }
+            },
+	
+            calculateSwipeDirection: function() {
+                if ( (this.swipeAngle <= 45) && (this.swipeAngle >= 0) ) {
+                    this.swipeDirection = 'left';
+                } else if ( (this.swipeAngle <= 360) && (this.swipeAngle >= 315) ) {
+                    this.swipeDirection = 'left';
+                } else if ( (this.swipeAngle >= 135) && (this.swipeAngle <= 225) ) {
+                    this.swipeDirection = 'right';
+                } else if ( (this.swipeAngle > 45) && (this.swipeAngle < 135) ) {
+                    this.swipeDirection = 'down';
+                } else {
+                    this.swipeDirection = 'up';
+                }
+            },
+            calcIsTap:function(){
+                var x = this.touchStartX - this.touchEndX;
+                var y = this.touchEndY - this.touchStartY;
+                this.isTap= (x < 3 && y < 3);
+            }
+        }
+        $(document).bind("touchstart", function (event) {
+            //
+            var orig = event.originalEvent;
+            mobileInput.touchStartY = orig.touches[0].pageY;
+            mobileInput.touchStartX = orig.touches[0].pageX;
+            mobileInput.isTouching = true;
+        });
+
+
+        $(document).bind("touchend", function (event) {
+            if(mobileInput.calcIsTap()){ //need no angles or direction on a tap..
+                    
+            }
+            else {
+                mobileInput.calculateAngle();
+                mobileInput.calculateSwipeDirection();
+                if (touchHandler.swipeDirection == "left") {
+
+                }
+                else if (touchHandler.swipeDirection == "right") {
+
+                }
+            }
+            mobileInput.isTouching = false;
+
+        });
+
+        $(document).bind("touchmove", function (event) {
+            event.preventDefault();
+            var orig = event.originalEvent;
+            mobileInput.touchEndX = orig.touches[0].pageX;
+            mobileInput.touchEndY = orig.touches[0].pageY;
+
+        });
+
 
     });
 });
