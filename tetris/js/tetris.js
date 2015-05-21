@@ -25,12 +25,15 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
             if (newWidthToHeight > widthToHeight) {
                 // window width is too wide relative to desired game width
                 newWidth = newHeight * widthToHeight;
-                document.getElementById('gameArea').style.height = newHeight + 'px';
-                document.getElementById('gameArea').style.width = newWidth + 'px';
-            } else { // window height is too high relative to desired game height
+            }
+            else { // window height is too high relative to desired game height
                 newHeight = newWidth / widthToHeight;
-                document.getElementById('gameArea').style.width = newWidth + 'px';
-                document.getElementById('gameArea').style.height = newHeight + 'px';
+            }
+            syncGameAreaSizes(newWidth, newHeight);
+
+            function syncGameAreaSizes(width, height) {
+                document.getElementById('gameArea').style.width = width + 'px';
+                document.getElementById('gameArea').style.height = height + 'px';
             }
             c.width = newWidth;
             c.height = newHeight;
@@ -43,7 +46,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
         lock = false,
         defaultBlockColor = '#505050',
         miniCube = [0, 0, 1, 0, 1, 1, 0, 1],
-        longy = [[0, 0, 0, 1, 0, 2, 0, 3], [0, 0, 1, 0, 2, 0, 3, 0]],
+        longy = [[1, 0, 1, 1, 1, 2, 1, 3], [0, 0, 1, 0, 2, 0, 3, 0]],
         zed = [[0, 1, 1, 1, 1, 2, 2, 2], [2, 0, 1, 1, 2, 1, 1, 2]],
         zedReverse = [[0, 0, 0, 1, 1, 1, 1, 2], [1, 1, 2, 1, 0, 2, 1, 2]],
         cube = [[0, 0, 1, 0, 0, 1, 1, 1]],
@@ -299,7 +302,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                     //renderStartScreen();
                     boardMap.forEach(function (a) {
                         a.forEach(function (b) {
-                            b.mass = 0.008;
+                            b.mass = 0.13;
                         });
                     });
                     setTimeout(function () {
@@ -502,6 +505,18 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                     gameControl.gameOverItems.push(b);
                 });
             });
+
+            var scorecolor = '#de7011';
+            letterbox.renderSentence('score', 15.5, 3, 23, scorecolor).forEach(function (a) {
+                a.forEach(function (b) {
+                    //now in StickFigs
+                    gameControl.gameOverItems.push(b);
+                });
+            });
+            var scoreText = new zz.textBlock(block * 1, (block * 12) + 4, 200, 60, gameControl.score.value, scorecolor, { size: block * 3, font: 'arial', fontStyle: 'bold' });
+            gameControl.gameOverItems.push(scoreText);
+
+
             gameControl.gameOverItems.push(
               new zz.image(
                       {
@@ -608,7 +623,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
                 if (kds == "") {
                     kds = setInterval(function () {
                         handleFallingItem();
-                    }, 50);
+                    }, 30);
                 }
             }
             if (event.keyCode === 38) {
@@ -668,7 +683,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
 
         $(document).bind("touchend", function (event) {
             if(mobileInput.calcIsTap()){ //need no angles or direction on a tap..
-                    
+                gameControl.currentFallingItem.rotate();
             }
             else {
                 mobileInput.calculateAngle();
