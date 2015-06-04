@@ -698,8 +698,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
 
 
         $(document).bind("touchend", function (event) {
-            //event.preventDefault();
-            if (mobileInput.calcIsTap()) { //need no angles or direction on a tap..
+            if(mobileInput.calcIsTap()){ //need no angles or direction on a tap..
                 gameControl.currentFallingItem.rotate();
             }
             else {
