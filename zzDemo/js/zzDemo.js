@@ -43,7 +43,9 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction','lib/zzDebug','lib
     $("document").ready(function () {
 
 
-        zz.init($("#canvas1")[0]);
+        zz.init($("#canvas1")[0],function(a) {
+            
+        });
         //            var testItem = new zz.item();
         var noSquare = [10, 10, 100, 10, 110, 40, 10, 50];
         var curvy1 = [10, 10, 30, 30, 50, 0, 70, 50];
