@@ -7,6 +7,25 @@
 
 define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'lib/colorLab', 'lib/kindof'], function ($, zz, zzUtil, zzInteraction, zzDebug, colorLab, kindof) {
 
+    var settings = {
+        dirX: 0,
+        yForce: -8,
+        arrVals: [-4, 0, 4],
+        currentSpeedIndex : 1,
+        setDirectionX: function (v) {
+            if (v === 'left' && this.currentSpeedIndex > 0) {
+                this.currentSpeedIndex--;
+            }
+            else if (v === 'right' && this.currentSpeedIndex < 2) {
+                this.currentSpeedIndex++;
+            }
+            this.dirX = this.arrVals[this.currentSpeedIndex];
+            zz.world.gravity.x = -this.dirX;
+            var forcedPositive = this.dirX < 0 ? this.dirX * -1 : this.dirX;
+            this.yForce = -8 + (forcedPositive * 0.5);
+        }
+    };
+    window.settings = settings;
 
 
 
@@ -24,9 +43,19 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
         zz.definitions.shapes.push(noSquare);
 
         function seedCloud(x, y, forceX) {
-            var cloud = new zz.stickFigure(x, y, 100, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: -8 });
+            var cloud = new zz.stickFigure(x, y, 30, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: -8 });
             cloud.pathType = 'curvy';
-            //cloud.onRenderEnd = addBounceForce; //should check collision with other figures, that could be a floor for instance...
+            cloud.onRenderEnd = function(item) {
+                item.attachedForce.y = settings.yForce;
+                if (zz.isCollide(item, you)) {
+                    you.fillColor = "#ff0000";
+                    zz.world.gravity.x = 0;
+                    settings.yForce = 0;
+                    settings.dirX = 0;
+                } else {
+                    //you.fillColor = "#000000";
+                }
+            }; //should check collision with other figures, that could be a floor for instance...
             return cloud;
         }
 
@@ -40,16 +69,21 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             }
         }
         function seedSkier(x,y) {
-            var s= new zz.stickFigure(x, y, 100, 30, "#333333", "#444444", skier, 1, { x: 0, y: 0 });
+            var s= new zz.stickFigure(x, y, 20, 20, "#333333", "#444444", skier, 1, { x: 3, y: 0 });
             s.pathType = 'square';
+            s.onRenderEnd = function renderEnd(renderedItem) {
+                renderedItem.attachedForce.x = settings.dirX;
+            }
+
             return s;
         }
 
         seedTrees();
-        zz.world.items.push(seedSkier(300, 300));
+        var you = seedSkier(300, 300);
+        zz.world.items.push(you);
         //        zz.world.items.push(seedCloud(310, 10, 0));
         zz.world.gravity.y = 0;
-        zz.world.gravity.x = -3;
+        zz.world.gravity.x = 0;
 
         //for (var i = 0; i < 100; i++) {
         //    zz.world.items.push(seedRandomPopcorn());
@@ -62,10 +96,20 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             c++;
             zz.world.items.forEach(function (stickFig) {
                 //  if(stickFig)
-
+                
                 stickFig.render(stickFig.onRenderEnd);
             });
         });
+        $("body").on("keydown", function (evt) {
+            if (evt.which === 37) {
+                settings.setDirectionX('left');
+            }
+            if (evt.which === 39) {
+                settings.setDirectionX('right');
+            }
+        });
+
     });
+
 
 });

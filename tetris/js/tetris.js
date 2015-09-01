@@ -317,11 +317,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             },
             initFallingItem: function () {
                 //  this.state = 1;
-<<<<<<< HEAD
                 this.currentFallingItem.variShape = [longy, zed, zedReverse, cube, theL, theLReverse,halfPlus].randItem();
-=======
-                this.currentFallingItem.variShape = [longy, zed, zedReverse, cube, theL, theLReverse].randItem();
->>>>>>> 63e391a297154a03d671b17e6d3dcb3c48f8c607
                 this.currentFallingItem.offsetX = 5;
                 this.currentFallingItem.offsetY = 0;
                 this.currentFallingItem.rotation = 0;
@@ -703,12 +699,8 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
 
 
         $(document).bind("touchend", function (event) {
-<<<<<<< HEAD
             //event.preventDefault();
-            if (mobileInput.calcIsTap()) { //need no angles or direction on a tap..
-=======
             if(mobileInput.calcIsTap()){ //need no angles or direction on a tap..
->>>>>>> 63e391a297154a03d671b17e6d3dcb3c48f8c607
                 gameControl.currentFallingItem.rotate();
             }
             else {
