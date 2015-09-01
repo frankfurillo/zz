@@ -18,22 +18,39 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
         //            var testItem = new zz.item();
         var
             noSquare = [10, 10, 100, 10, 110, 40, 10, 50],
-            testCloud = [0, 5, 40, 0, 40, 40, 0, 40, 0, 20];
-
+            testCloud = [0, 5, 20, 0, 20, 20, 0, 20, 0, 10],
+            skier = [0, 0, 10, 0, 10, 10, 0, 10];
+            
         zz.definitions.shapes.push(noSquare);
 
         function seedCloud(x, y, forceX) {
-            var cloud = new zz.stickFigure(x, y, 100, 30, "#FEFEFE", "#FFFFFF", testCloud, 1, { x: forceX, y: 0 });
-            cloud.lastSpeedY = -3;
+            var cloud = new zz.stickFigure(x, y, 100, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: -8 });
             cloud.pathType = 'curvy';
             //cloud.onRenderEnd = addBounceForce; //should check collision with other figures, that could be a floor for instance...
             return cloud;
         }
 
 
+        function seedTrees() {
+            var maxy = 500;
+            var deltaH = 70;
+            for (var i = 0; i < maxy; i++) {
+                var randW = (Math.random() * zz.world.w);
+                zz.world.items.push(seedCloud(randW, i * deltaH, 0));
+            }
+        }
+        function seedSkier(x,y) {
+            var s= new zz.stickFigure(x, y, 100, 30, "#333333", "#444444", skier, 1, { x: 0, y: 0 });
+            s.pathType = 'square';
+            return s;
+        }
 
-        zz.world.items.push(seedCloud(10, 10, 0));
-        zz.world.gravity = 0;
+        seedTrees();
+        zz.world.items.push(seedSkier(300, 300));
+        //        zz.world.items.push(seedCloud(310, 10, 0));
+        zz.world.gravity.y = 0;
+        zz.world.gravity.x = -3;
+
         //for (var i = 0; i < 100; i++) {
         //    zz.world.items.push(seedRandomPopcorn());
         //}
