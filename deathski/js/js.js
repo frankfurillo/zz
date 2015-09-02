@@ -28,17 +28,23 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
     window.settings = settings;
 
 
-
+    Array.prototype.randItem = function () {
+        return this[Math.floor(Math.random() * this.length)];
+    }
     $("document").ready(function () {
 
         zz.init($("#canvas1")[0], function (a) {
-
         });
+
+        zz.spriteEngine.spriteImageSrc = 'img/trees.png';
+
         //            var testItem = new zz.item();
         var
             noSquare = [10, 10, 100, 10, 110, 40, 10, 50],
             testCloud = [0, 5, 20, 0, 20, 20, 0, 20, 0, 10],
             skier = [0, 0, 10, 0, 10, 10, 0, 10];
+
+        var treeSpritePositions = [[10, 10, 28, 24], [68, 8, 90, 54]];
             
         zz.definitions.shapes.push(noSquare);
 
@@ -60,12 +66,41 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
         }
 
 
+        function getSpriteMeasure(coords) {
+            return {
+                w: coords[2] - coords[0],
+                h: coords[3] - coords[1]
+            };
+        }
+
+
+
+        function seedSpriteTree(x, y, forceX) {
+            var randTree = treeSpritePositions.randItem();
+            var mess = getSpriteMeasure(randTree);
+
+            var sprite = new zz.sprite(x, y, mess.w, mess.h, randTree[0],randTree[1]);
+            sprite.onRenderEnd = function (item) {
+                item.attachedForce.y = settings.yForce;
+                if (zz.isCollide(item, you)) {
+                    you.fillColor = "#ff0000";
+                    zz.world.gravity.x = 0;
+                    settings.yForce = 0;
+                    settings.dirX = 0;
+                } else {
+                    //you.fillColor = "#000000";
+                }
+            }; //should check collision with other figures, that could be a floor for instance...
+            return sprite;
+        }
+
         function seedTrees() {
             var maxy = 500;
             var deltaH = 70;
             for (var i = 0; i < maxy; i++) {
                 var randW = (Math.random() * zz.world.w);
-                zz.world.items.push(seedCloud(randW, i * deltaH, 0));
+                //zz.world.items.push(seedCloud(randW, i * deltaH, 0));
+                zz.world.items.push(seedSpriteTree(randW, i * deltaH, 0));
             }
         }
         function seedSkier(x,y) {
