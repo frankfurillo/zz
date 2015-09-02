@@ -31,8 +31,15 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
     Array.prototype.randItem = function () {
         return this[Math.floor(Math.random() * this.length)];
     }
-    $("document").ready(function () {
 
+    window.skiApp = {
+        run: runApp
+    };
+
+    function runApp(){
+
+//    $("document").ready(function () {
+    
         zz.init($("#canvas1")[0], function (a) {
         });
 
@@ -44,7 +51,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             testCloud = [0, 5, 20, 0, 20, 20, 0, 20, 0, 10],
             skier = [0, 0, 10, 0, 10, 10, 0, 10];
 
-        var treeSpritePositions = [[10, 10, 28, 24], [68, 8, 90, 54]];
+        var treeSpritePositions = [[10, 10, 28, 24], [68, 8, 90, 54],[34,52,61,115], [98,16,121,54]];
             
         zz.definitions.shapes.push(noSquare);
 
@@ -144,7 +151,5 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             }
         });
 
-    });
-
-
+    };
 });

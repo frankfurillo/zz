@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <script src="../../require.js" data-main="js/js.js"></script>
-    <title>Death ski</title>
+    <title>Ski</title>
 <style>
     .center-me {
       margin: 0 auto;
@@ -21,12 +21,8 @@
         <h1>-</h1>
         <h2> -</h2>
         <section>
-            <canvas id="canvas1" width="800" height="600" style="border:1px solid #454545;margin-left:auto;margin-right:auto;width:800px;height:600px;background-color:#fefefe" />
+            <canvas id="canvas1" onclick="skiApp.run()" width="800" height="600" style="border:1px solid #454545;margin-left:auto;margin-right:auto;width:800px;height:600px;background-color:#fefefe" />
         </section>
-        <nav>
-            <button onclick="settings.setDirectionX(-5)">Left</button>
-            <button onclick="settings.setDirectionX(5)">Right</button>
-        </nav>
 
     </div>
 </body>
