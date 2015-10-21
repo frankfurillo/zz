@@ -5,24 +5,27 @@
     }
 });
 
-define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'lib/colorLab', 'lib/kindof'], function ($, zz, zzUtil, zzInteraction, zzDebug, colorLab, kindof) {
+define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
+'lib/colorLab', 'lib/kindof'], function ($, zz, zzUtil, zzInteraction, zzDebug, colorLab, kindof) {
 
     var settings = {
+        speed:4,
         dirX: 0,
-        yForce: -8,
-        arrVals: [-4, 0, 4],
-        currentSpeedIndex : 1,
+        yForce: -5,
+        yForceInitial : -5,
+        arrVals: [-3,-2, 0, 2,3],
+        currentSpeedIndex : 2,
         setDirectionX: function (v) {
             if (v === 'left' && this.currentSpeedIndex > 0) {
                 this.currentSpeedIndex--;
             }
-            else if (v === 'right' && this.currentSpeedIndex < 2) {
+            else if (v === 'right' && this.currentSpeedIndex < 4) {
                 this.currentSpeedIndex++;
             }
             this.dirX = this.arrVals[this.currentSpeedIndex];
             zz.world.gravity.x = -this.dirX;
             var forcedPositive = this.dirX < 0 ? this.dirX * -1 : this.dirX;
-            this.yForce = -8 + (forcedPositive * 0.5);
+            this.yForce = this.yForceInitial + (forcedPositive * 0.8);
         }
     };
     window.settings = settings;
@@ -39,7 +42,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
     function runApp(){
 
 //    $("document").ready(function () {
-    
+
         zz.init($("#canvas1")[0], function (a) {
         });
 
@@ -52,11 +55,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             skier = [0, 0, 10, 0, 10, 10, 0, 10];
 
         var treeSpritePositions = [[10, 10, 28, 24], [68, 8, 90, 54],[34,52,61,115], [98,16,121,54]];
-            
+
         zz.definitions.shapes.push(noSquare);
 
         function seedCloud(x, y, forceX) {
-            var cloud = new zz.stickFigure(x, y, 30, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: -8 });
+            var cloud = new zz.stickFigure(x, y, 30, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: settings.yForce });
             cloud.pathType = 'curvy';
             cloud.onRenderEnd = function(item) {
                 item.attachedForce.y = settings.yForce;
@@ -120,7 +123,7 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
             return s;
         }
 
-        seedTrees();
+        var ss= setTimeout(function(){seedTrees()},2000) ;
         var you = seedSkier(300, 300);
         zz.world.items.push(you);
         //        zz.world.items.push(seedCloud(310, 10, 0));
@@ -134,11 +137,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug', 'l
 
         var c = 0;
 
-        zz.run(function (ctx) { //render callback som parameter. Anropas från animate. 
+        zz.run(function (ctx) { //render callback som parameter. Anropas från animate.
             c++;
             zz.world.items.forEach(function (stickFig) {
                 //  if(stickFig)
-                
+
                 stickFig.render(stickFig.onRenderEnd);
             });
         });
