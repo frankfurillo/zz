@@ -26,7 +26,11 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
             zz.world.gravity.x = -this.dirX;
             var forcedPositive = this.dirX < 0 ? this.dirX * -1 : this.dirX;
             this.yForce = this.yForceInitial + (forcedPositive * 0.8);
+        },
+        accelerate: function(){
+
         }
+
     };
     window.settings = settings;
 
@@ -58,22 +62,6 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
 
         zz.definitions.shapes.push(noSquare);
 
-        function seedCloud(x, y, forceX) {
-            var cloud = new zz.stickFigure(x, y, 30, 30, "#669966", "#cccccc", testCloud, 1, { x: forceX, y: settings.yForce });
-            cloud.pathType = 'curvy';
-            cloud.onRenderEnd = function(item) {
-                item.attachedForce.y = settings.yForce;
-                if (zz.isCollide(item, you)) {
-                    you.fillColor = "#ff0000";
-                    zz.world.gravity.x = 0;
-                    settings.yForce = 0;
-                    settings.dirX = 0;
-                } else {
-                    //you.fillColor = "#000000";
-                }
-            }; //should check collision with other figures, that could be a floor for instance...
-            return cloud;
-        }
 
 
         function getSpriteMeasure(coords) {
@@ -91,7 +79,16 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
 
             var sprite = new zz.sprite(x, y, mess.w, mess.h, randTree[0],randTree[1]);
             sprite.onRenderEnd = function (item) {
-                item.attachedForce.y = settings.yForce;
+
+                if(settings.dirX===0){
+                    if(settings.yForce > - 20){
+                      item.attachedForce.y  -=0.1;
+                    }
+                }
+                else{
+                  item.attachedForce.y = settings.yForce;
+                }
+
                 if (zz.isCollide(item, you)) {
                     you.fillColor = "#ff0000";
                     zz.world.gravity.x = 0;
@@ -109,7 +106,6 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
             var deltaH = 70;
             for (var i = 0; i < maxy; i++) {
                 var randW = (Math.random() * zz.world.w);
-                //zz.world.items.push(seedCloud(randW, i * deltaH, 0));
                 zz.world.items.push(seedSpriteTree(randW, i * deltaH, 0));
             }
         }
