@@ -13,7 +13,8 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
         dirX: 0,
         yForce: -5,
         yForceInitial : -5,
-        arrVals: [-3,-2, 0, 2,3],
+        arrVals: [-2.5,-2, 0, 2,2.5],
+        arrAcc : [-0.1,0,0.05,0,-0.1],
         currentSpeedIndex : 2,
         setDirectionX: function (v) {
             if (v === 'left' && this.currentSpeedIndex > 0) {
@@ -27,8 +28,8 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
             var forcedPositive = this.dirX < 0 ? this.dirX * -1 : this.dirX;
             this.yForce = this.yForceInitial + (forcedPositive * 0.8);
         },
-        accelerate: function(){
-
+        getAcc: function(){
+          return this.arrAcc[this.currentSpeedIndex];
         }
 
     };
@@ -80,7 +81,15 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
             var sprite = new zz.sprite(x, y, mess.w, mess.h, randTree[0],randTree[1]);
             sprite.onRenderEnd = function (item) {
 
-                if(settings.dirX===0){
+              if((  item.attachedForce.y-3) > - 14 && (  item.attachedForce.y+3) < 2 ){
+                //run acceleration calc...
+                item.attachedForce.y -= settings.getAcc();
+              }
+              else{
+                item.attachedForce.y = settings.yForce;
+
+              }
+      /*          if(settings.dirX===0){
                     if(settings.yForce > - 20){
                       item.attachedForce.y  -=0.1;
                     }
@@ -88,12 +97,12 @@ define(['jquery', 'lib/zz', 'lib/zzUtil', 'lib/zzInteraction', 'lib/zzDebug',
                 else{
                   item.attachedForce.y = settings.yForce;
                 }
-
+*/
                 if (zz.isCollide(item, you)) {
-                    you.fillColor = "#ff0000";
+/*                    you.fillColor = "#ff0000";
                     zz.world.gravity.x = 0;
                     settings.yForce = 0;
-                    settings.dirX = 0;
+                    settings.dirX = 0;*/
                 } else {
                     //you.fillColor = "#000000";
                 }
