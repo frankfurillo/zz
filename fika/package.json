@@ -1,0 +1,15 @@
+{
+  "name": "fika",
+  "version": "1.0.0",
+  "description": "console app to manage fika members",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "frankfurillo",
+  "license": "ISC",
+  "preferGlobal": true,
+  "bin": {
+    "fika": "./index.js"
+  }
+}

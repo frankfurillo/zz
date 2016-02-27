@@ -1,0 +1,30 @@
+<html>
+<head>
+    <script src="qwerty.js"></script>
+  <script src="../../require.js" data-main="js/js.js"></script>
+<style>
+* {font-family: arial}
+.controls{margin:10px 0 10px 0}
+.controls input[type="text"]{width:29px;border-width:0;outline:none;font-size:18px}
+</style>
+</head>
+<body>
+  <section class="controls">
+    <div>
+      <label for="noOfOscillators">Oscillators</label>
+       <input type="range" min="1" max="20" value="3" oninput="synth.farmSize=this.value;showOsc.value=this.value" id="noOfOscillators"/>
+       <input id="showOsc" type="text" value="3"/>
+    </div>
+     <div>
+       <label for="detune">Detune</label>
+        <input type="range" min="1" max="10" value="1" oninput="synth.detune=this.value/100;showDetune.value=this.value" id="detuneval"/>
+        <input id="showDetune" type="text" value="1"/>
+
+
+     </div>
+
+  </section>
+<div id="keys"></div>
+<button name=seq onclick="synth.playSequence(['A4','C4','D#4'])">Sequence</button>
+</body>
+</html>
