@@ -1,0 +1,79 @@
+<html>
+<head>
+  <style>
+  input{border:none;outline:none;display:inline;}
+
+    div.center-me {
+      margin:0 auto 0 auto;
+      width:1200px;
+    }
+    #history{display:inline;}
+    * {background-color:black;color:lightgreen;font-family:courier;font-size:24px}
+
+  </style>
+  <script src="../jquery.js"></script>
+  <script>
+  "use strict"
+   let commands = [
+     {
+     selector: "list",
+     command : listfika
+   },
+   {
+   key: 13,
+   command : null
+ }
+
+ ];
+ var findCommand = (name)=>{
+   var cm= commands.filter(c=>{
+     return c.selector===name
+   });
+   if(cm.length > 0 ){
+     return cm[0];
+   }
+   return null;
+ };
+
+    $(document).ready(function(){
+      $('#prompt').focus(function(){
+  this.selectionStart = this.selectionEnd = this.value.length-1;
+});
+      $('#prompt').focus();
+
+      $('#prompt').on('keydown',function(event){
+          if(event.keyCode === 13){
+
+            let v = $(this).val();
+            var c =findCommand(v);
+            if(c!==null){
+              c.command();
+            }
+            else{
+            }
+            $('#history').append(v + "<br>");
+            $('#prompt').val('').focus();
+
+            //console.log($(this).val());
+          }
+      });
+    });
+
+    function listfika(){
+      alert("lista fikan dude...")
+    };
+  </script>
+
+</head>
+<body>
+
+  <div class="center-me" style="height:500px;">
+<div id="history" style="">
+  Fika initializing...<br/>
+  Awaiting command...
+  <br/>
+</div>
+<input id="prompt"/>
+  </div>
+</body>
+</html>
