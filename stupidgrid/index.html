@@ -23,16 +23,16 @@ const renderGrid = (dataSource,targetElement) =>{
     targetElement[0].appendChild(table);
 }
 
-const createColumn = (data) =>{
+const createColumn = (source) =>{
     var td = document.createElement("TD");
-    if(typeof data==="object"){
-        if(data.editable){
-            $(td).attr("editor","true").attr("text",data.text);
-            td.textContent = data.text;
+    if(typeof source==="object"){
+        if(source.editable){
+            $(td).attr("editor","true").attr("text",source.value).data("source",source);
+            td.textContent = source.text;
         }
     }
     else{
-        td.textContent=data;
+        td.textContent=source;
     }
     return td;
 }
@@ -44,12 +44,16 @@ const attachEvents = ()=>{
         inp.className="theEditor";
         e.target.textContent="";
         e.target.appendChild(inp);
+        const tdElement = $(e.target);
         $(".theEditor").focus().select();
+        $(".theEditor").on('blur',(e)=>{
+            tdElement.data("source").value = $(e.target).val();
+        })
     });  
 }
 
 
-const data = [["mån",1,2,3],["tis",4,{text:'apa',editable:true},6]];  
+const data = [["mån",1,2,3],["tis",4,{value:'apa',editable:true},6]];  
 
 $("document").ready(()=>{
     
