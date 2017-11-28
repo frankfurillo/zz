@@ -10,11 +10,17 @@
 var say =(val,options)=>{
   //su.text =val;
   var su = new SpeechSynthesisUtterance();
-  su.rate = 0.1;
-  su.pitch = 0.1;
+  su.rate = 0.8;
+  su.pitch = 1.1;
   su.lang = "sv";
   if(options.reverse){
     su.text = reverseString(val);
+  }
+  else if(options.piratize){
+    su.text = piratize(val);
+  }
+  else if(options.fikonize){
+    su.text = fikonize(val);
   }
   else{
     su.text = val;
@@ -41,8 +47,41 @@ var reverseString = (v)=>{
   return res;
 }
 
+const vowels = "auoeiyöåä";
+const piratize = (v) => {
+  let res = '';
+  for(var i=0; i<v.length;i++){
+    res += vowels.indexOf(v[i])==-1 ? v[i]+"o"+v[i]: v[i];
+  }
+  console.log(res);
+  return res;
+  
+} 
+
+const fikonize = (v) => {
+	let sentence = "";
+	const words = v.split(" ");
+	words.forEach(w=>{
+		var res ="fi";
+		//split on  first vowel
+		var splitIndex = 0;
+		var arrFirstPart = [];
+		for(var i=0; i<w.length;i++){
+			if(vowels.indexOf(w[i])!=-1 ){
+				splitIndex = i;
+				break;
+			}
+		}
+		var wordPart1 = w.substring(0,splitIndex+1);
+		var endOfWord = w.substring(splitIndex+1);
+		var fikon = "fi" + endOfWord + wordPart1 +"kon";
+		console.log(fikon);
+	});
+	
+}
+
 const sayText = () =>{
-   say($('#ta1').val(),{reverse:true});
+   say($('#ta1').val(),{fikonize:true});
 }
 
 var activateMic=() =>{
@@ -83,7 +122,7 @@ var activateMic=() =>{
     <div class="cent">
     <h1>IRIS</h1>
   <button style="margin-top:40px;" class="startbtn" onclick="activateMic()">Jag har h&ouml;jt volymen och har en mikrof&aring;n</button>
-  <textarea id="ta1" style="margin-top:70px" placeholder="Jag tycker inte om att prata h&ouml;gt in i en sk&auml;rm...">Skriv h&aring;r</textarea>
+  <textarea id="ta1" style="margin-top:70px" placeholder="Jag tycker inte om att prata h&ouml;gt in i en sk&auml;rm...">Skriv h&auml;r</textarea>
   <button style="margin-top:10px;" class="startbtn" onclick="sayText()">K&ouml;r</button>
   <div id="output" class="cent" style="margin-top:30px">
   </div>

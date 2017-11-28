@@ -45,21 +45,41 @@
                 e.target.appendChild(inp);
                 const tdElement = $(e.target);
                 $(".theEditor").focus().select();
-                $(".theEditor").on('blur',(e)=>{
-                    tdElement.data("source").value = $(e.target).val();
+                const updateSourceValue = (value) =>{
+                    tdElement.data("source").value = value;
                     stupidGrid.sourceUpdated();
+                };
+                $(".theEditor").on('blur',(e)=>{
+                    updateSourceValue($(e.target).val());
+                }).on('keydown',(e)=>{
+                    if([39,37].indexOf(e.which)!==-1){
+                        if(e.which===37){
+                            if(getCaretPos($(".theEditor")).start===0){
+                                updateSourceValue($(e.target).val());
+                            }    
+                        }
+                        //check caret position within text. if 0, left should be active, if above length, right should be active.
+                    }
                 })
             });  
         },
         sourceUpdated : () =>{
             //grids source was updated, value changed... sort of
-        }
+        },
 
 
     }
     window.stupidGrid = stupidGrid;
 
 })(window,jQuery);
+
+function getCaretPos(ctrl){
+    if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+        return {'start': ctrl.selectionStart, 'end': ctrl.selectionEnd };
+    } else {
+        return {'start': 0, 'end': 0};
+    }
+}
 
 const data = [["mån",1,2,3],["tis",4,{value:'apa',editable:true},6]];  
 

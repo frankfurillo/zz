@@ -12,6 +12,8 @@ requirejs.config({
 define(['jquery',  'lib/kindof', 'lib/zzSound'], function ($, kindof,zzSound) {
   var keyboard;
   $(document).ready(function(){
+
+
     keyboard = new QwertyHancock({
                      id: 'keys',
                      width: 600,
@@ -26,6 +28,9 @@ define(['jquery',  'lib/kindof', 'lib/zzSound'], function ($, kindof,zzSound) {
                    window.synth = synth;
                 });
                 keyboard.keyDown = function (note, frequency) {
+                      if(zzSound.arpeggiator.recording){
+                        zzSound.arpeggiator.notes.push(note);
+                      }
                       zzSound.playFreq(frequency);
                     // Your code here
                 };
@@ -37,4 +42,5 @@ define(['jquery',  'lib/kindof', 'lib/zzSound'], function ($, kindof,zzSound) {
                 };
 
   });
+
 });
