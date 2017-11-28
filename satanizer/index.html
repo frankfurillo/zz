@@ -13,13 +13,13 @@ var say =(val,options)=>{
   su.rate = 0.8;
   su.pitch = 1.1;
   su.lang = "sv";
-  if(options.reverse){
+  if(options.talkstyle=='reverse'){
     su.text = reverseString(val);
   }
-  else if(options.piratize){
+  else if(options.talkstyle='piratize'){
     su.text = piratize(val);
   }
-  else if(options.fikonize){
+  else if(options.talkstyle='fikonize'){
     su.text = fikonize(val);
   }
   else{
@@ -81,7 +81,8 @@ const fikonize = (v) => {
 }
 
 const sayText = () =>{
-   say($('#ta1').val(),{fikonize:true});
+var selected = $('input[name=talkstyle]').val()
+   say($('#ta1').val(),{talkstyle:selected});
 }
 
 var activateMic=() =>{
@@ -123,6 +124,8 @@ var activateMic=() =>{
     <h1>IRIS</h1>
   <button style="margin-top:40px;" class="startbtn" onclick="activateMic()">Jag har h&ouml;jt volymen och har en mikrof&aring;n</button>
   <textarea id="ta1" style="margin-top:70px" placeholder="Jag tycker inte om att prata h&ouml;gt in i en sk&auml;rm...">Skriv h&auml;r</textarea>
+  <input type="radio" name="talkstyle" value="reverse"/>
+  <input type="radio" name="talkstyle" value="fikonize"/>
   <button style="margin-top:10px;" class="startbtn" onclick="sayText()">K&ouml;r</button>
   <div id="output" class="cent" style="margin-top:30px">
   </div>
