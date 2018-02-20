@@ -12,6 +12,8 @@
 
   </style>
   <script src="../jquery.js"></script>
+  <script src="js.js"></script>
+  
   <script>
   "use strict"
    let commands = [
@@ -22,6 +24,9 @@
    {
    key: 13,
    command : null
+ }, {
+   selector: "help",
+   command: help
  }
 
  ];
@@ -46,12 +51,12 @@
 
             let v = $(this).val();
             var c =findCommand(v);
+            $('#history').append(v + "<br>");
             if(c!==null){
               c.command();
             }
             else{
             }
-            $('#history').append(v + "<br>");
             $('#prompt').val('').focus();
 
             //console.log($(this).val());
@@ -60,8 +65,17 @@
     });
 
     function listfika(){
-      alert("lista fikan dude...")
+        $('#history').append("<br>" + getFika(0) +  "<br>");
     };
+    
+    function viewList(){
+    }
+    
+    function help(){
+      commands.filter(x=>x.command!=null).forEach(c=>{
+        $('#history').append("<br>" + c.selector + ": "+ c.command.name + "<br>");
+      });
+    }
   </script>
 
 </head>

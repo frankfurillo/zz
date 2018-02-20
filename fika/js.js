@@ -1,5 +1,4 @@
-var args = process.argv.slice(2);
-
+"use strict"
 var appConfig = {
   host:'gunnarfranklin.com',
   getPath : '/Apps/fika/getObj.php?id=',
@@ -7,35 +6,7 @@ var appConfig = {
 
 }
 
-var fikalistObj ={
-    startDate: new Date(),
-    owner : "Gunnar The Great",
-    members: [
-        "Marcus",
-        "Gabriella",
-        "Banarne"
-    ]
-}
 
-function spawn(){
-    console.log(JSON.stringify(fikalistObj));
-}
-
-args.forEach(function(a){
-  if(a==='listMembers'){
-    listMembers();
-  }
-  if(a === "spawn"){
-      spawn();
-  }
-})
-
-var fika;
-
-function listMembers(){
-    fika = getFika(0); //TODO pass id later...
-//    process.stdout.write(fika);
-}
 
 
 function addDays(date, days) {
@@ -46,83 +17,45 @@ function addDays(date, days) {
 
 function getFika(id){
     console.log("muuuu");
-     var http = require('http');
     var url = "http://"+ appConfig.host + appConfig.getPath+ id;
-    http.get(url, res => {
-  res.setEncoding("utf8");
+    $.get(url, (data) => {
   var body = "";
-  res.on("data", data => {
       console.log(data);
        var p = JSON.parse(data);
        var fikalistItem = JSON.parse(p[0].value);
        var d = fikalistItem.startDate;
+       console.log(d);
        console.log(d.substring(0,4));
        console.log(parseInt(d.substring(5,2)));
-       var startDate = new Date(d.substring(0,4),parseInt(d.substring(5,7)), parseInt(d.substring(8,10)));
+       var month = parseInt(d.substring(8,10));
+       console.log("d",month);
+       var startDate = new Date(d.substring(0,4),parseInt(d.substring(6,7))-1, parseInt(d.substring(8,10)));
        var occurrance = parseInt(fikalistItem.occuranceDays,10);
        d = startDate;
        var lastIteratedMember = "";
        console.log(startDate);
-       
-       while(d <  addDays(new Date(),occurrance+1)){
-                
+       var membersFromToday = [];
+       while(d <  addDays(new Date(),(occurrance* fikalistItem.members.length))){
                fikalistItem.members.forEach(function(a){
-                   d = addDays(startDate,occurrance);
+                    if(d>new Date()){
+                        membersFromToday.push({member: a,date: d});
+                    }
+                    d = addDays(d,occurrance);
                     lastIteratedMember = a;
                });
        }
-        console.log("Next weeks fika belongs to" + lastIteratedMember)
+       
+        console.log("Next weeks fika belongs to" + lastIteratedMember +"<br>");
+        console.log("Members from this date and forward" );
+        membersFromToday.forEach(p=>{
+            console.log("members", p.member + "<br>");
+        })
+       
         console.log("\r\nAll members of this fikalist");
         fikalistItem.members.forEach(function(a){
             console.log("\n\n"+ a);
         })
-  });
-  res.on("end", () => {
-    console.info('\n\nCall completed');
-  });
 });
-}
-
-function getFika2(id){
-
-  var http = require('http');
-
-  /**
-   * HOW TO Make an HTTP Call - GET
-   */
-  // options for GET
-  var optionsget = {
-      host : appConfig.host, // here only the domain name
-      // (no http/https !)
-      port : 80,
-      path : appConfig.getPath+id, // the rest of the url with parameters if needed
-      method : 'GET' // do GET
-  };
-
-  // do the GET request
-  var returnData;
-  var reqGet = http.request(optionsget, function(res) {
-      console.log("statusCode: ", res.statusCode);
-      // uncomment it for header details
-  //  console.log("headers: ", res.headers);
-
-
-      res.on('data', function(d) {
-          console.info('GET result:\n');
-          returnData= d;
-
-          process.stdout.write(d);
-          console.info('\n\nCall completed');
-          return d;
-      });
-
-  });
-
-  reqGet.end();
-  reqGet.on('error', function(e) {
-      console.error(e);
-  });
-  return returnData;
 }
 
 function updateFika(){
