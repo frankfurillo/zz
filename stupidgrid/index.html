@@ -1,0 +1,117 @@
+<html>
+    <head>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script>
+(function(window,$){
+    "use strict"
+    var stupidGrid = {
+        renderGrid : (dataSource,targetElement) =>{
+            var table= document.createElement("TABLE");
+            dataSource.forEach(r=>{
+                var tr = document.createElement("TR");
+                r.forEach(c=>{
+                    tr.appendChild(stupidGrid.createColumn(c));
+                })
+                table.appendChild(tr);
+            })
+            targetElement[0].appendChild(table);
+        },
+
+
+        createColumn : (source) =>{
+            var td = document.createElement("TD");
+            if(typeof source==="object"){
+                if(source.editable){
+                    $(td).attr("editor","true").attr("text",source.value).data("source",source);
+                    td.textContent = source.text;
+                }
+            }
+            else{
+                td.textContent=source;
+            }
+            return td;
+        }
+        ,
+
+        attachEvents : ()=>{
+            $("td[editor='true']").on("click focus",(e)=>{
+                var inp = document.createElement("INPUT");
+                inp.value= $(e.target).attr("text");
+                inp.className="theEditor";
+                e.target.textContent="";
+                e.target.appendChild(inp);
+                const tdElement = $(e.target);
+                $(".theEditor").focus().select();
+                const updateSourceValue = (value) =>{
+                    tdElement.data("source").value = value;
+                    stupidGrid.sourceUpdated();
+                };
+                $(".theEditor").on('blur',(e)=>{
+                    updateSourceValue($(e.target).val());
+                }).on('keydown',(e)=>{
+                    if([39,37].indexOf(e.which)!==-1){
+                        if(e.which===37){
+                            if(getCaretPos($(".theEditor")).start===0){
+                                updateSourceValue($(e.target).val());
+                            }    
+                        }
+                        //check caret position within text. if 0, left should be active, if above length, right should be active.
+                    }
+                })
+            });  
+        },
+        sourceUpdated : () =>{
+            //grids source was updated, value changed... sort of
+        },
+
+
+    }
+    window.stupidGrid = stupidGrid;
+
+})(window,jQuery);
+
+function getCaretPos(ctrl){
+    if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+        return {'start': ctrl.selectionStart, 'end': ctrl.selectionEnd };
+    } else {
+        return {'start': 0, 'end': 0};
+    }
+}
+
+const data = [["mån",1,2,3],["tis",4,{value:'apa',editable:true},6]];  
+
+$("document").ready(()=>{
+        
+    stupidGrid.renderGrid(data,$("#gridTarget"));
+    stupidGrid.attachEvents();
+});
+
+</script>
+<style>
+* {font-family: sans-serif;color:#444}
+#gridTarget table { border-spacing: 0px;
+    border-collapse: separate;border:1px solid #333;border-width:0 0 1px 1px }
+#gridTarget table td {background-color:#efefef; 
+border:1px solid #333;padding:10px;margin:0;
+border-width:1px 1px 0 0;
+width:50px;text-align: right;
+}
+#gridTarget table td:hover {background-color:aliceblue}
+#gridTarget td.editable input {margin:0;width:100%;height:100%}
+</style>
+
+    </head>
+    <body>
+
+    <div id="gridTarget"" data-col="" class="grid">
+        
+    </div>
+    MyValues:
+    <div id="myValues">
+
+    </div>
+    </body>
+</html>

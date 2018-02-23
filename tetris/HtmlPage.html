@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script>
+
+        var arr1 = [{ namn: 'hej', order: '0' }, { namn: 'två', order: '1' }, { namn: 'bbb', order: '2' }];
+
+
+
+
+        function changeOrder(item, newOrderNr) {
+            var tmp = [];
+            arr1.forEach(function(a) {
+                if (a.order < newOrderNr) {
+                    tmp.push(a);
+                }
+                
+            });
+            tmp.push(item);
+            arr1.forEach(function (a) {
+                if (a.order > newOrderNr) {
+                    tmp.push(a);
+                }
+
+            });
+            for (var i = 0; i < tmp.length; i++) {
+                tmp[i].order = i;
+//                alert(tmp[i].namn);
+            }
+            alert(arr1.map(function(a) { return a.namn }));
+
+        }
+
+        changeOrder(arr1[1], 0);
+    </script>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+﻿@font-face {
+    font-family: odin;
+    src: url(fonts/odin_rounded_-_bold-webfont.woff);
+}
+@font-face {
+    font-family: norwester;
+    src: url(fonts/norwester.woff);
+}
+body{
+<<<<<<< HEAD
+    margin:0;background-color: black;
+=======
+    margin:0;
+>>>>>>> 63e391a297154a03d671b17e6d3dcb3c48f8c607
+}
+div.centerme {
+    width:300px;
+    
+    margin:0 auto 0 auto;
+     
+}
+canvas{margin:0px
+
+          -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+
+}
+

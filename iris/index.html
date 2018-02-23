@@ -1,0 +1,103 @@
+
+<html>
+<meta name="viewport" content="width=device-width,
+  minimum-scale=1.0, maximum-scale=1.0"/>
+<head>
+  <script src="../jquery.js"></script>
+
+  <script>
+  "use strict"
+var say =(val,options)=>{
+  //su.text =val;
+  var su = new SpeechSynthesisUtterance();
+  su.rate = 0.1;
+  su.pitch = 0.1;
+  su.lang = "sv";
+  if(options.reverse){
+    su.text = reverseString(val);
+  }
+  else{
+    su.text = val;
+  }
+
+  speechSynthesis.speak( su);
+
+}
+var voices;
+function loadVoices() {
+    voices = speechSynthesis.getVoices();
+}
+//loadVoices();
+window.speechSynthesis.onvoiceschanged = function (e) {
+    loadVoices();
+};
+
+
+var reverseString = (v)=>{
+  let res ='';
+  for(var i= v.length-1;i>=0;i--){
+    res+=v[i]
+  }
+  return res;
+}
+
+const sayText = () =>{
+   say($('#ta1').val(),{reverse:true});
+}
+
+var activateMic=() =>{
+  $('#micbtn').html('S&auml;g n&aring;got p&aring; svenska');
+  var recognizer = new webkitSpeechRecognition();
+  recognizer.lang = "sv";
+  recognizer.continous = true;
+  recognizer.onresult = function(event) {
+    if (event.results.length > 0) {
+        var result = event.results[event.results.length-1];
+        if(result.isFinal) {
+            say(result[0].transcript,{reverse:true});
+            $('#output').append(result[0].transcript+'<br>');
+            //setTimeout(function(){activateMic()},1000);
+        }
+    }
+  };
+  recognizer.onend = function(event){
+    setTimeout(function(){activateMic()},2000);
+
+  }
+  recognizer.start();
+}
+
+  </script>
+  <style>
+  button,div,body,textarea {font-size:32px;font-family:arial;color:white;background-color:#dd33aa}
+  button{border:2px solid white;outline:none;border-radius:15px;font-size:24px;padding:18px 24px 18px 24px}
+  button:hover{background-color:#ef45be;}
+  .cent{margin:0 auto 0 auto;display:block;width:600px;}
+  h1{font-size:64px;font-weight:bold;margin-bottom:5px}
+  h4{font-size:18px;font-weight:normal;margin:0;padding:0}
+  textarea{font-size:18;background-color:white;color:#555;display:block;width:450px;padding:10px;height:200px;border-radius:5px}
+  .grad {
+      background: #e545be; /* For browsers that do not support gradients */
+      background: linear-gradient(#e545be, #ad34ce); /* Standard syntax */
+  }
+  .grad:hover{
+    background: #f565ee; /* For browsers that do not support gradients */
+    background: linear-gradient(#f565ee, #bd44de); /* Standard syntax */
+  }
+
+  </style>
+  <title>Iris - a parrot in reverse...</title>
+</head>
+<body>
+    <div class="cent">
+    <h1>Iris</h1>
+    <h4>-svarar alltid bakl&auml;nges </h4>
+  <button style="margin-top:40px;" class="startbtn grad anim" id="micbtn" onclick="activateMic()">Jag har h&ouml;jt volymen och har en mikrof&aring;n</button>
+  <textarea id="ta1" style="margin-top:70px" placeholder="">Eller... Jag har ingen mick, och jag tycker inte om att prata h&ouml;gt in i en sk&auml;rm...Jag skriver ist&auml;llet</textarea>
+  <button style="margin-top:10px;" class="startbtn grad" onclick="sayText()">K&ouml;r</button>
+  <div id="output" class="cent" style="margin-top:30px">
+  </div>
+  <h4>Iris works only in Chrome for desktops</h4>
+  </div>
+</body>
+</html>
