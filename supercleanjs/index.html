@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <script src="js/lib/store.js" type="module"></script>
+        <script type="module" src="js/main.js">
+           
+        
+        </script>
+    </head>
+    <body>
+
+        <stupid-grid id="myStupid" text="mangolassie"></stupid-grid>
+        <div id="mycontainer">
+            <div class="row">
+                <div class="col">
+                    <model-bound trigger-on="store.updated"/>
+                    {{Header1}}
+                </div>
+                <div class="col">
+                    Header2
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    Header1
+                </div>
+                <div class="col">
+                    Header2
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
