@@ -1,15 +1,23 @@
 <html>
     <head>
         <script src="js/lib/store.js" type="module"></script>
+        <script src="js/lib/shout.js"></script>
         <script type="module" src="js/main.js">
            
         
         </script>
+        <script>
+                window.shout.subscribe("knapptrycket",()=>{
+            alert("fick också samma shout");
+        })
+
+        </script>
     </head>
     <body>
 
-        <stupid-grid id="myStupid" text="mangolassie"></stupid-grid>
-        <div id="mycontainer">
+        <!-- <stupid-grid id="myStupid" text="mangolassie"></stupid-grid> -->
+        <navigation-menu ></navigation-menu>
+        <div id="mycontainer"> 
             <div class="row">
                 <div class="col">
                     <model-bound trigger-on="store.updated"/>
@@ -27,6 +35,7 @@
                     Header2
                 </div>
             </div>
+            <button onclick="shout.shoutout('knapptrycket')" >kasta ett event</button>
         </div>
     </body>
 </html>

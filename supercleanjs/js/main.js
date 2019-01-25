@@ -1,6 +1,7 @@
 "use strict";
 import store from './lib/store.js'
-
+import niceLink from './components/niceLink.js';
+import navigationMenu from './components/navigationMenu.js';
 class StupidGrid extends HTMLElement{
     constructor(){
         super();
@@ -14,7 +15,13 @@ class StupidGrid extends HTMLElement{
 };
 
 function init(){
-    customElements.define('stupid-grid',StupidGrid);
+    //init elements  -move this to more generic set
+    customElements.define('navigation-menu',navigationMenu);
+    customElements.define('nice-link',niceLink);
+    
+    //  window.shout = shout;
+    //hook up shouter
+
 }
 
 document.addEventListener("DOMContentLoaded", function(event) { 
