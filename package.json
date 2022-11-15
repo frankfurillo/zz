@@ -4,7 +4,8 @@
   "description": "Canvas 2d library, lightweight, modular and awesome",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"test\""
+    "test": "echo \"test\"",
+    "start-server": "node .\\node_modules\\http-server\\bin\\http-server ."
   },
   "repository": {
     "type": "git",
